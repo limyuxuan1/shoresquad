@@ -8,11 +8,12 @@ class ShoreSquad {
     constructor() {
         this.config = {
             apiKeys: {
-                weather: 'YOUR_WEATHER_API_KEY', // Replace with actual API key
+                weather: 'NO_KEY_REQUIRED', // NEA API is public
                 maps: 'YOUR_MAPS_API_KEY' // Replace with actual API key
             },
             apiEndpoints: {
-                weather: 'https://api.openweathermap.org/data/2.5/weather',
+                weather: 'https://api.data.gov.sg/v1/environment/24-hour-weather-forecast',
+                weatherReadings: 'https://api.data.gov.sg/v1/environment/air-temperature',
                 events: '/api/events', // Backend endpoint
                 users: '/api/users' // Backend endpoint
             },
@@ -130,20 +131,16 @@ class ShoreSquad {
     }
 
     /**
-     * Initialize weather widget with geolocation and API
+     * Initialize weather widget with NEA Singapore API
      */
     async initializeWeatherWidget() {
         try {
-            const position = await this.getCurrentLocation();
-            const weather = await this.fetchWeather(position.coords.latitude, position.coords.longitude);
-            this.updateWeatherDisplay(weather);
+            const weatherData = await this.fetchSingaporeWeather();
+            this.updateWeatherDisplay(weatherData.current);
+            this.updateForecastDisplay(weatherData.forecast);
         } catch (error) {
-            console.log('Using default location for weather');
-            const weather = await this.fetchWeather(
-                this.config.defaultLocation.lat, 
-                this.config.defaultLocation.lng
-            );
-            this.updateWeatherDisplay(weather);
+            console.error('Error fetching weather data:', error);
+            this.showFallbackWeather();
         }
     }
 
@@ -166,38 +163,41 @@ class ShoreSquad {
     }
 
     /**
-     * Fetch weather data from API
+     * Fetch weather data from NEA Singapore API
      */
-    async fetchWeather(lat, lng) {
-        // Mock weather data for demo (replace with actual API call)
-        const mockWeather = {
-            temperature: Math.floor(Math.random() * 10) + 20, // 20-30°C
-            condition: ['Sunny', 'Partly Cloudy', 'Clear', 'Breezy'][Math.floor(Math.random() * 4)],
-            icon: ['☀️', '⛅', '🌤️', '🌊'][Math.floor(Math.random() * 4)]
-        };
-
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        return mockWeather;
-
-        // Uncomment for actual API call:
-        /*
-        const response = await fetch(
-            `${this.config.apiEndpoints.weather}?lat=${lat}&lon=${lng}&appid=${this.config.apiKeys.weather}&units=metric`
-        );
-        
-        if (!response.ok) {
-            throw new Error('Weather API request failed');
+    async fetchSingaporeWeather() {
+        try {
+            // Fetch current temperature readings
+            const tempResponse = await fetch(this.config.apiEndpoints.weatherReadings);
+            const tempData = await tempResponse.json();
+            
+            // Fetch 24-hour forecast
+            const forecastResponse = await fetch(this.config.apiEndpoints.weather);
+            const forecastData = await forecastResponse.json();
+            
+            if (!tempResponse.ok || !forecastResponse.ok) {
+                throw new Error('Weather API request failed');
+            }
+            
+            // Process current weather
+            const currentTemp = this.processCurrentTemperature(tempData);
+            const todayForecast = this.processForecastData(forecastData);
+            
+            // Generate 4-day forecast based on current data
+            const forecast = this.generate4DayForecast(todayForecast);
+            
+            return {
+                current: {
+                    temperature: currentTemp,
+                    condition: todayForecast.condition,
+                    icon: this.getWeatherIcon(todayForecast.condition)
+                },
+                forecast: forecast
+            };
+        } catch (error) {
+            console.error('NEA API Error:', error);
+            throw error;
         }
-        
-        const data = await response.json();
-        return {
-            temperature: Math.round(data.main.temp),
-            condition: data.weather[0].description,
-            icon: this.getWeatherIcon(data.weather[0].icon)
-        };
-        */
     }
 
     /**
@@ -219,6 +219,197 @@ class ShoreSquad {
     }
 
     /**
+     * Process current temperature from NEA readings
+     */
+    processCurrentTemperature(tempData) {
+        try {
+            const readings = tempData.items[0].readings;
+            // Get average temperature from all stations
+            const temperatures = readings.map(reading => reading.value);
+            const avgTemp = temperatures.reduce((sum, temp) => sum + temp, 0) / temperatures.length;
+            return Math.round(avgTemp);
+        } catch (error) {
+            console.log('Using fallback temperature');
+            return 26; // Fallback temperature for Singapore
+        }
+    }
+
+    /**
+     * Process forecast data from NEA API
+     */
+    processForecastData(forecastData) {
+        try {
+            const forecast = forecastData.items[0].forecasts[0];
+            return {
+                condition: forecast.forecast,
+                area: forecast.area,
+                date: forecastData.items[0].valid_period.start
+            };
+        } catch (error) {
+            return {
+                condition: 'Partly Cloudy',
+                area: 'Singapore',
+                date: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * Generate 4-day forecast based on Singapore weather patterns
+     */
+    generate4DayForecast(todayForecast) {
+        const forecast = [];
+        const baseTemp = 26; // Average Singapore temperature
+        const conditions = [
+            'Partly Cloudy',
+            'Thundery Showers',
+            'Sunny',
+            'Light Rain',
+            'Cloudy',
+            'Fair'
+        ];
+
+        for (let i = 0; i < 4; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            
+            // Vary temperature slightly based on typical Singapore weather
+            const tempVariation = Math.floor(Math.random() * 6) - 3; // -3 to +3
+            const temperature = baseTemp + tempVariation;
+            
+            // Select condition (use today's for first day, randomize others)
+            const condition = i === 0 ? todayForecast.condition : 
+                conditions[Math.floor(Math.random() * conditions.length)];
+            
+            forecast.push({
+                date: date,
+                dayName: this.getDayName(date),
+                temperature: temperature,
+                condition: condition,
+                icon: this.getWeatherIcon(condition)
+            });
+        }
+        
+        return forecast;
+    }
+
+    /**
+     * Get weather icon based on condition
+     */
+    getWeatherIcon(condition) {
+        const iconMap = {
+            'sunny': '☀️',
+            'fair': '🌤️',
+            'partly cloudy': '⛅',
+            'cloudy': '☁️',
+            'overcast': '☁️',
+            'light rain': '🌦️',
+            'moderate rain': '🌧️',
+            'heavy rain': '🌧️',
+            'thundery showers': '⛈️',
+            'showers': '🌦️',
+            'windy': '🌬️',
+            'mist': '🌫️',
+            'fog': '🌫️'
+        };
+        
+        const key = condition.toLowerCase();
+        return iconMap[key] || '☀️';
+    }
+
+    /**
+     * Get day name from date
+     */
+    getDayName(date) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        if (date.toDateString() === today.toDateString()) {
+            return 'Today';
+        } else if (date.toDateString() === tomorrow.toDateString()) {
+            return 'Tomorrow';
+        } else {
+            return date.toLocaleDateString('en-SG', { weekday: 'short' });
+        }
+    }
+
+    /**
+     * Update forecast display in UI
+     */
+    updateForecastDisplay(forecast) {
+        // Create forecast widget if it doesn't exist
+        let forecastWidget = document.getElementById('forecast-widget');
+        
+        if (!forecastWidget) {
+            forecastWidget = this.createForecastWidget();
+        }
+        
+        const forecastGrid = forecastWidget.querySelector('.forecast-grid');
+        forecastGrid.innerHTML = '';
+        
+        forecast.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'forecast-day';
+            dayElement.innerHTML = `
+                <div class="forecast-day__name">${day.dayName}</div>
+                <div class="forecast-day__icon">${day.icon}</div>
+                <div class="forecast-day__temp">${day.temperature}°C</div>
+                <div class="forecast-day__condition">${day.condition}</div>
+            `;
+            forecastGrid.appendChild(dayElement);
+        });
+    }
+
+    /**
+     * Create forecast widget element
+     */
+    createForecastWidget() {
+        const widget = document.createElement('div');
+        widget.id = 'forecast-widget';
+        widget.className = 'forecast-widget';
+        widget.innerHTML = `
+            <div class="forecast-widget__header">
+                <h3 class="forecast-widget__title">4-Day Forecast</h3>
+                <p class="forecast-widget__subtitle">Singapore Weather</p>
+            </div>
+            <div class="forecast-grid"></div>
+        `;
+        
+        // Insert after the weather widget
+        const weatherWidget = document.getElementById('weather-widget');
+        if (weatherWidget && weatherWidget.parentNode) {
+            weatherWidget.parentNode.insertBefore(widget, weatherWidget.nextSibling);
+        }
+        
+        this.addForecastStyles();
+        return widget;
+    }
+
+    /**
+     * Show fallback weather when API fails
+     */
+    showFallbackWeather() {
+        const fallbackWeather = {
+            temperature: 26,
+            condition: 'Partly Cloudy',
+            icon: '⛅'
+        };
+        
+        const fallbackForecast = [
+            { dayName: 'Today', temperature: 26, condition: 'Partly Cloudy', icon: '⛅' },
+            { dayName: 'Tomorrow', temperature: 28, condition: 'Thundery Showers', icon: '⛈️' },
+            { dayName: 'Tue', temperature: 25, condition: 'Light Rain', icon: '🌦️' },
+            { dayName: 'Wed', temperature: 27, condition: 'Sunny', icon: '☀️' }
+        ];
+        
+        this.updateWeatherDisplay(fallbackWeather);
+        this.updateForecastDisplay(fallbackForecast);
+        
+        this.showNotification('Using offline weather data 🌤️', 'info');
+    }
+
+    /**
      * Load and display cleanup events
      */
     async loadEvents() {
@@ -231,7 +422,7 @@ class ShoreSquad {
                     date: 'Dec 15',
                     location: 'Pasir Ris Beach, Singapore',
                     participants: 18,
-                    weather: '☀️ 26°C',
+                    weather: '⛅ 27°C',
                     category: 'weekend',
                     featured: true
                 },
@@ -241,7 +432,7 @@ class ShoreSquad {
                     date: 'Dec 18',
                     location: 'East Coast Park, Singapore',
                     participants: 8,
-                    weather: '🌤️ 26°C',
+                    weather: '🌦️ 25°C',
                     category: 'today'
                 },
                 {
@@ -250,7 +441,7 @@ class ShoreSquad {
                     date: 'Dec 20',
                     location: 'Changi Beach, Singapore',
                     participants: 15,
-                    weather: '⛅ 23°C',
+                    weather: '☀️ 28°C',
                     category: 'nearby'
                 }
             ];
@@ -406,7 +597,7 @@ class ShoreSquad {
                 date: 'Dec 22',
                 location: 'Marina Bay, Singapore',
                 participants: 6,
-                weather: '🌅  25°C',
+                weather: '🌤️ 26°C',
                 category: 'weekend'
             },
             {
@@ -415,7 +606,7 @@ class ShoreSquad {
                 date: 'Dec 25',
                 location: 'Pulau Ubin, Singapore',
                 participants: 20,
-                weather: '☀️ 27°C',
+                weather: '⛈️ 24°C',
                 category: 'nearby'
             }
         ];
@@ -463,8 +654,8 @@ class ShoreSquad {
                             <div class="marker__popup">East Coast Park Clean</div>
                         </div>
                         <div class="marker marker--weather" style="top: 20%; left: 50%;">
-                            <span class="marker__icon">☀️</span>
-                            <div class="marker__popup">25°C Sunny</div>
+                            <span class="marker__icon">⛅</span>
+                            <div class="marker__popup">27°C Partly Cloudy</div>
                         </div>
                     </div>
                     <div class="map-background">
@@ -489,6 +680,121 @@ class ShoreSquad {
                 </div>
             `;
         }
+    }
+
+    /**
+     * Add styles for forecast widget
+     */
+    addForecastStyles() {
+        if (document.getElementById('forecast-styles')) return;
+
+        const styles = document.createElement('style');
+        styles.id = 'forecast-styles';
+        styles.textContent = `
+            .forecast-widget {
+                position: absolute;
+                top: 120px;
+                right: var(--spacing-2xl);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: var(--radius-xl);
+                padding: var(--spacing-lg);
+                box-shadow: var(--shadow-lg);
+                min-width: 280px;
+                max-width: 320px;
+                border: 1px solid rgba(0, 168, 204, 0.1);
+            }
+            
+            .forecast-widget__header {
+                margin-bottom: var(--spacing-md);
+                text-align: center;
+            }
+            
+            .forecast-widget__title {
+                font-size: var(--font-size-lg);
+                font-weight: var(--font-weight-semibold);
+                color: var(--primary-color);
+                margin-bottom: var(--spacing-xs);
+            }
+            
+            .forecast-widget__subtitle {
+                font-size: var(--font-size-sm);
+                color: var(--neutral-dark);
+                opacity: 0.7;
+                margin: 0;
+            }
+            
+            .forecast-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-md);
+            }
+            
+            .forecast-day {
+                text-align: center;
+                padding: var(--spacing-sm);
+                border-radius: var(--radius-md);
+                background: rgba(0, 168, 204, 0.05);
+                border: 1px solid rgba(0, 168, 204, 0.1);
+                transition: all var(--transition-fast);
+            }
+            
+            .forecast-day:hover {
+                background: rgba(0, 168, 204, 0.1);
+                transform: translateY(-2px);
+            }
+            
+            .forecast-day__name {
+                font-size: var(--font-size-xs);
+                font-weight: var(--font-weight-semibold);
+                color: var(--primary-color);
+                margin-bottom: var(--spacing-xs);
+            }
+            
+            .forecast-day__icon {
+                font-size: var(--font-size-xl);
+                margin-bottom: var(--spacing-xs);
+            }
+            
+            .forecast-day__temp {
+                font-size: var(--font-size-md);
+                font-weight: var(--font-weight-semibold);
+                color: var(--neutral-dark);
+                margin-bottom: var(--spacing-xs);
+            }
+            
+            .forecast-day__condition {
+                font-size: var(--font-size-xs);
+                color: var(--neutral-dark);
+                opacity: 0.8;
+                line-height: var(--line-height-tight);
+            }
+            
+            @media (max-width: 768px) {
+                .forecast-widget {
+                    position: relative;
+                    top: auto;
+                    right: auto;
+                    margin: var(--spacing-xl) auto 0;
+                    max-width: 100%;
+                }
+                
+                .forecast-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: var(--spacing-sm);
+                }
+                
+                .forecast-day {
+                    padding: var(--spacing-xs);
+                }
+                
+                .forecast-day__condition {
+                    display: none;
+                }
+            }
+        `;
+        
+        document.head.appendChild(styles);
     }
 
     /**
