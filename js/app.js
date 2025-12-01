@@ -227,12 +227,13 @@ class ShoreSquad {
             const mockEvents = [
                 {
                     id: 1,
-                    title: 'Sentosa Beach Cleanup',
+                    title: 'Pasir Ris Beach Cleanup',
                     date: 'Dec 15',
-                    location: 'Sentosa Island, Singapore',
-                    participants: 12,
-                    weather: '☀️ 24°C',
-                    category: 'weekend'
+                    location: 'Pasir Ris Beach, Singapore',
+                    participants: 18,
+                    weather: '☀️ 26°C',
+                    category: 'weekend',
+                    featured: true
                 },
                 {
                     id: 2,
@@ -291,8 +292,9 @@ class ShoreSquad {
      */
     createEventCard(event) {
         const card = document.createElement('div');
-        card.className = 'event-card';
+        card.className = event.featured ? 'event-card event-card--featured' : 'event-card';
         card.innerHTML = `
+            ${event.featured ? '<div class="event-card__badge">Next Cleanup</div>' : ''}
             <div class="event-card__header">
                 <span class="event-card__date">${event.date}</span>
                 <span class="event-card__weather">${event.weather}</span>
