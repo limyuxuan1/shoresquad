@@ -7,20 +7,12 @@
 class ShoreSquad {
     constructor() {
         this.config = {
-            apiKeys: {
-                weather: 'NO_KEY_REQUIRED', // NEA API is public
-                maps: 'YOUR_MAPS_API_KEY' // Replace with actual API key
-            },
-            apiEndpoints: {
-                weather: 'https://api.data.gov.sg/v1/environment/24-hour-weather-forecast',
-                weatherReadings: 'https://api.data.gov.sg/v1/environment/air-temperature',
-                events: '/api/events', // Backend endpoint
-                users: '/api/users' // Backend endpoint
-            },
+            location: 'East Coast Park',
             defaultLocation: {
-                lat: 1.3521, // Singapore latitude
-                lng: 103.8198 // Singapore longitude
-            }
+                lat: 1.3010, // East Coast Park latitude
+                lng: 103.9138 // East Coast Park longitude
+            },
+            neaWeatherApi: 'https://api.data.gov.sg/v1/environment/24-hour-weather-forecast'
         };
 
         this.state = {
@@ -131,214 +123,231 @@ class ShoreSquad {
     }
 
     /**
-     * Initialize weather widget with NEA Singapore API
+     * Initialize weather widget with real NEA API
      */
     async initializeWeatherWidget() {
+        // Show loading state
+        this.showWeatherLoading();
+        
         try {
-            const weatherData = await this.fetchSingaporeWeather();
-            this.updateWeatherDisplay(weatherData.current);
-            this.updateForecastDisplay(weatherData.forecast);
+            // Fetch real weather data from NEA API
+            const weatherData = await this.fetchNEAWeather();
+            this.updateWeatherDisplay(weatherData);
+            this.updateForecastDisplay(weatherData.periods);
         } catch (error) {
-            console.error('Error fetching weather data:', error);
-            this.showFallbackWeather();
+            console.error('Weather fetch error:', error);
+            this.showWeatherError();
         }
-    }
-
-    /**
-     * Get user's current location
-     */
-    getCurrentLocation() {
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error('Geolocation not supported'));
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000 // 5 minutes
-            });
-        });
     }
 
     /**
      * Fetch weather data from NEA Singapore API
      */
-    async fetchSingaporeWeather() {
-        try {
-            // Fetch current temperature readings
-            const tempResponse = await fetch(this.config.apiEndpoints.weatherReadings);
-            const tempData = await tempResponse.json();
-            
-            // Fetch 24-hour forecast
-            const forecastResponse = await fetch(this.config.apiEndpoints.weather);
-            const forecastData = await forecastResponse.json();
-            
-            if (!tempResponse.ok || !forecastResponse.ok) {
-                throw new Error('Weather API request failed');
-            }
-            
-            // Process current weather
-            const currentTemp = this.processCurrentTemperature(tempData);
-            const todayForecast = this.processForecastData(forecastData);
-            
-            // Generate 4-day forecast based on current data
-            const forecast = this.generate4DayForecast(todayForecast);
-            
-            return {
-                current: {
-                    temperature: currentTemp,
-                    condition: todayForecast.condition,
-                    icon: this.getWeatherIcon(todayForecast.condition)
-                },
-                forecast: forecast
-            };
-        } catch (error) {
-            console.error('NEA API Error:', error);
-            throw error;
+    /**
+     * Fetch real-time weather data from NEA Singapore API
+     * Retrieves 24-hour forecast including temperature, humidity, and conditions
+     * 
+     * @returns {Promise<Object|null>} Weather data object or null on error
+     * @throws {Error} Network or API errors (caught and handled internally)
+     */
+    async fetchNEAWeather() {
+        const response = await fetch(this.config.neaWeatherApi);
+        
+        if (!response.ok) {
+            throw new Error(`NEA API returned status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Safely extract forecast data
+        if (!data.items || data.items.length === 0) {
+            throw new Error('No weather data available from NEA');
+        }
+        
+        const item = data.items[0];
+        const generalForecast = item.general || {};
+        const periods = item.periods || [];
+        
+        // Extract useful forecast information
+        const forecast = generalForecast.forecast || 'No forecast available';
+        const temperature = generalForecast.temperature || {};
+        const humidity = generalForecast.relative_humidity || {};
+        
+        // Determine emoji based on forecast text
+        const emoji = this.getWeatherEmoji(forecast);
+        
+        // Get temperature info
+        const tempLow = temperature.low || 24;
+        const tempHigh = temperature.high || 32;
+        const avgTemp = Math.round((tempLow + tempHigh) / 2);
+        
+        return {
+            location: 'Singapore Beaches',
+            temperature: avgTemp,
+            tempRange: `${tempLow}-${tempHigh}°C`,
+            condition: forecast,
+            rain: this.extractRainInfo(forecast),
+            emoji: emoji,
+            humidity: `${humidity.low || 60}-${humidity.high || 95}%`,
+            periods: periods,
+            timestamp: item.timestamp
+        };
+    }
+
+    /**
+     * Get appropriate weather emoji based on forecast text
+     */
+    /**
+     * Map weather condition text to appropriate emoji icon
+     * Supports various conditions: thundery showers, rain, cloudy, fair, etc.
+     * 
+     * @param {string} forecast - Weather condition description from NEA
+     * @returns {string} Emoji character representing the weather condition
+     */
+    getWeatherEmoji(forecast) {
+        const text = forecast.toLowerCase();
+        
+        if (text.includes('thunder') || text.includes('storm')) return '⛈️';
+        if (text.includes('heavy rain') || text.includes('heavy showers')) return '🌧️';
+        if (text.includes('rain') || text.includes('showers')) return '🌦️';
+        if (text.includes('cloudy') && text.includes('partly')) return '⛅';
+        if (text.includes('cloudy') || text.includes('overcast')) return '☁️';
+        if (text.includes('fair') || text.includes('sunny')) return '☀️';
+        if (text.includes('hazy') || text.includes('haze')) return '🌫️';
+        
+        return '🌤️'; // Default
+    }
+
+    /**
+     * Extract rain information from forecast
+     */
+    extractRainInfo(forecast) {
+        const text = forecast.toLowerCase();
+        
+        if (text.includes('thunder') || text.includes('storm')) {
+            return 'Thunderstorms expected';
+        }
+        if (text.includes('heavy rain') || text.includes('heavy showers')) {
+            return 'Heavy rain likely';
+        }
+        if (text.includes('showers') || text.includes('rain')) {
+            return 'Showers possible';
+        }
+        if (text.includes('cloudy') || text.includes('overcast')) {
+            return 'May see some clouds';
+        }
+        
+        return 'Good beach weather!';
+    }
+
+    /**
+     * Show loading state while fetching weather
+     */
+    /**
+     * Display animated loading state while fetching weather data
+     * Shows wave emoji with pulsing animation and friendly loading message
+     */
+    showWeatherLoading() {
+        const tempElement = document.getElementById('weather-temp');
+        const conditionElement = document.getElementById('weather-condition');
+        const locationElement = document.getElementById('weather-location');
+
+        if (locationElement) {
+            locationElement.textContent = 'Singapore Beaches';
+        }
+
+        if (tempElement) {
+            tempElement.innerHTML = '<span style="animation: pulse 1.5s ease-in-out infinite;">🌊</span>';
+        }
+
+        if (conditionElement) {
+            conditionElement.textContent = 'Loading beach weather vibes…';
+            conditionElement.style.fontStyle = 'italic';
         }
     }
 
     /**
-     * Update weather display in UI
+     * Show error state when weather fetch fails
+     */
+    showWeatherError() {
+        const tempElement = document.getElementById('weather-temp');
+        const conditionElement = document.getElementById('weather-condition');
+        const locationElement = document.getElementById('weather-location');
+
+        if (locationElement) {
+            locationElement.textContent = 'Singapore Beaches';
+        }
+
+        if (tempElement) {
+            tempElement.innerHTML = '🌊 --°C';
+        }
+
+        if (conditionElement) {
+            conditionElement.textContent = '⚠️ Oops! Weather data unavailable. Check connection & try refreshing!';
+            conditionElement.style.fontStyle = 'normal';
+            conditionElement.style.color = '#F77F00';
+        }
+        
+        // Show notification to user
+        this.showNotification('Unable to fetch weather data. Please check your internet connection.', 'error');
+    }
+
+
+
+
+
+    /**
+     * Update weather display in UI with real NEA data
      */
     updateWeatherDisplay(weather) {
         const tempElement = document.getElementById('weather-temp');
         const conditionElement = document.getElementById('weather-condition');
+        const locationElement = document.getElementById('weather-location');
 
         if (tempElement) {
-            tempElement.textContent = `${weather.temperature}°C`;
+            tempElement.innerHTML = `${weather.emoji} ${weather.temperature}°C <span style="font-size: 0.7em; opacity: 0.7;">(${weather.tempRange})</span>`;
         }
 
         if (conditionElement) {
-            conditionElement.textContent = `${weather.icon} ${weather.condition}`;
+            conditionElement.textContent = `${weather.condition} • ${weather.rain}`;
+            conditionElement.style.fontStyle = 'normal';
+            conditionElement.style.color = '';
+        }
+        
+        if (locationElement) {
+            locationElement.textContent = weather.location;
         }
 
         this.state.weather = weather;
-    }
-
-    /**
-     * Process current temperature from NEA readings
-     */
-    processCurrentTemperature(tempData) {
-        try {
-            const readings = tempData.items[0].readings;
-            // Get average temperature from all stations
-            const temperatures = readings.map(reading => reading.value);
-            const avgTemp = temperatures.reduce((sum, temp) => sum + temp, 0) / temperatures.length;
-            return Math.round(avgTemp);
-        } catch (error) {
-            console.log('Using fallback temperature');
-            return 26; // Fallback temperature for Singapore
-        }
-    }
-
-    /**
-     * Process forecast data from NEA API
-     */
-    processForecastData(forecastData) {
-        try {
-            const forecast = forecastData.items[0].forecasts[0];
-            return {
-                condition: forecast.forecast,
-                area: forecast.area,
-                date: forecastData.items[0].valid_period.start
-            };
-        } catch (error) {
-            return {
-                condition: 'Partly Cloudy',
-                area: 'Singapore',
-                date: new Date().toISOString()
-            };
-        }
-    }
-
-    /**
-     * Generate 4-day forecast based on Singapore weather patterns
-     */
-    generate4DayForecast(todayForecast) {
-        const forecast = [];
-        const baseTemp = 26; // Average Singapore temperature
-        const conditions = [
-            'Partly Cloudy',
-            'Thundery Showers',
-            'Sunny',
-            'Light Rain',
-            'Cloudy',
-            'Fair'
-        ];
-
-        for (let i = 0; i < 4; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() + i);
-            
-            // Vary temperature slightly based on typical Singapore weather
-            const tempVariation = Math.floor(Math.random() * 6) - 3; // -3 to +3
-            const temperature = baseTemp + tempVariation;
-            
-            // Select condition (use today's for first day, randomize others)
-            const condition = i === 0 ? todayForecast.condition : 
-                conditions[Math.floor(Math.random() * conditions.length)];
-            
-            forecast.push({
-                date: date,
-                dayName: this.getDayName(date),
-                temperature: temperature,
-                condition: condition,
-                icon: this.getWeatherIcon(condition)
-            });
-        }
         
-        return forecast;
+        console.log('✅ Weather updated from NEA API:', weather);
     }
 
-    /**
-     * Get weather icon based on condition
-     */
-    getWeatherIcon(condition) {
-        const iconMap = {
-            'sunny': '☀️',
-            'fair': '🌤️',
-            'partly cloudy': '⛅',
-            'cloudy': '☁️',
-            'overcast': '☁️',
-            'light rain': '🌦️',
-            'moderate rain': '🌧️',
-            'heavy rain': '🌧️',
-            'thundery showers': '⛈️',
-            'showers': '🌦️',
-            'windy': '🌬️',
-            'mist': '🌫️',
-            'fog': '🌫️'
-        };
-        
-        const key = condition.toLowerCase();
-        return iconMap[key] || '☀️';
-    }
+
 
     /**
-     * Get day name from date
+     * Update forecast display with real NEA periods data
      */
-    getDayName(date) {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        if (date.toDateString() === today.toDateString()) {
-            return 'Today';
-        } else if (date.toDateString() === tomorrow.toDateString()) {
-            return 'Tomorrow';
-        } else {
-            return date.toLocaleDateString('en-SG', { weekday: 'short' });
-        }
-    }
-
     /**
-     * Update forecast display in UI
+     * Display 24-hour forecast broken into periods (morning, afternoon, evening, night)
+     * Creates forecast cards for each time period with conditions and emoji
+     * 
+     * @param {Array} periods - Array of forecast period objects from NEA API
+     * @param {Object} periods[].time - Time range for this period
+     * @param {string} periods[].time.text - Human-readable period name
+     * @param {string} periods[].regions.east - Forecast for eastern region (East Coast)
      */
-    updateForecastDisplay(forecast) {
-        // Create forecast widget if it doesn't exist
+    /**
+     * Display 24-hour forecast broken into periods (morning, afternoon, evening, night)
+     * Creates forecast cards for each time period with conditions and emoji
+     * 
+     * @param {Array} periods - Array of forecast period objects from NEA API
+     * @param {Object} periods[].time - Time range for this period
+     * @param {string} periods[].time.text - Human-readable period name (e.g., "Morning")
+     * @param {Object} periods[].regions - Regional forecasts
+     * @param {string} periods[].regions.east - Forecast for eastern region (East Coast Park area)
+     */
+    updateForecastDisplay(periods) {
         let forecastWidget = document.getElementById('forecast-widget');
         
         if (!forecastWidget) {
@@ -348,17 +357,60 @@ class ShoreSquad {
         const forecastGrid = forecastWidget.querySelector('.forecast-grid');
         forecastGrid.innerHTML = '';
         
-        forecast.forEach(day => {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'forecast-day';
-            dayElement.innerHTML = `
-                <div class="forecast-day__name">${day.dayName}</div>
-                <div class="forecast-day__icon">${day.icon}</div>
-                <div class="forecast-day__temp">${day.temperature}°C</div>
-                <div class="forecast-day__condition">${day.condition}</div>
-            `;
-            forecastGrid.appendChild(dayElement);
-        });
+        // Use NEA periods data (morning, afternoon, evening, night)
+        if (periods && periods.length > 0) {
+            periods.slice(0, 4).forEach(period => {
+                const timeRegion = period.time || {};
+                const periodName = this.getPeriodName(timeRegion.start);
+                const forecast = period.regions?.east || period.regions?.central || 'Fair';
+                const emoji = this.getWeatherEmoji(forecast);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'forecast-day';
+                dayElement.innerHTML = `
+                    <div class="forecast-day__name">${periodName}</div>
+                    <div class="forecast-day__icon">${emoji}</div>
+                    <div class="forecast-day__condition">${this.shortenForecast(forecast)}</div>
+                `;
+                forecastGrid.appendChild(dayElement);
+            });
+        } else {
+            // Fallback if no periods data
+            forecastGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; opacity: 0.7;">24-hour forecast loading...</p>';
+        }
+    }
+
+    /**
+     * Get period name from timestamp
+     */
+    getPeriodName(timestamp) {
+        if (!timestamp) return 'Soon';
+        
+        const date = new Date(timestamp);
+        const hour = date.getHours();
+        
+        if (hour >= 6 && hour < 12) return 'Morning';
+        if (hour >= 12 && hour < 18) return 'Afternoon';
+        if (hour >= 18 && hour < 21) return 'Evening';
+        return 'Night';
+    }
+
+    /**
+     * Shorten forecast text for display
+     */
+    shortenForecast(forecast) {
+        if (!forecast) return 'Fair';
+        
+        // Simplify long forecast text
+        const text = forecast.toLowerCase();
+        if (text.includes('thundery')) return 'Thundery';
+        if (text.includes('heavy')) return 'Heavy Rain';
+        if (text.includes('showers')) return 'Showers';
+        if (text.includes('cloudy')) return 'Cloudy';
+        if (text.includes('rain')) return 'Rainy';
+        if (text.includes('fair')) return 'Fair';
+        
+        return forecast.split(' ').slice(0, 2).join(' ');
     }
 
     /**
@@ -370,8 +422,8 @@ class ShoreSquad {
         widget.className = 'forecast-widget';
         widget.innerHTML = `
             <div class="forecast-widget__header">
-                <h3 class="forecast-widget__title">4-Day Forecast</h3>
-                <p class="forecast-widget__subtitle">Singapore Weather</p>
+                <h3 class="forecast-widget__title">24-Hour Forecast</h3>
+                <p class="forecast-widget__subtitle">Singapore Weather (NEA)</p>
             </div>
             <div class="forecast-grid"></div>
         `;
@@ -386,28 +438,7 @@ class ShoreSquad {
         return widget;
     }
 
-    /**
-     * Show fallback weather when API fails
-     */
-    showFallbackWeather() {
-        const fallbackWeather = {
-            temperature: 26,
-            condition: 'Partly Cloudy',
-            icon: '⛅'
-        };
-        
-        const fallbackForecast = [
-            { dayName: 'Today', temperature: 26, condition: 'Partly Cloudy', icon: '⛅' },
-            { dayName: 'Tomorrow', temperature: 28, condition: 'Thundery Showers', icon: '⛈️' },
-            { dayName: 'Tue', temperature: 25, condition: 'Light Rain', icon: '🌦️' },
-            { dayName: 'Wed', temperature: 27, condition: 'Sunny', icon: '☀️' }
-        ];
-        
-        this.updateWeatherDisplay(fallbackWeather);
-        this.updateForecastDisplay(fallbackForecast);
-        
-        this.showNotification('Using offline weather data 🌤️', 'info');
-    }
+
 
     /**
      * Load and display cleanup events

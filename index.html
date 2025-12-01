@@ -93,11 +93,11 @@
                         <span class="hero__title--highlight">Clean Our Shores</span>
                     </h1>
                     <p class="hero__subtitle">
-                        Track weather, find cleanup events, and connect with your squad to make eco-action fun and impactful!
+                        Track weather, find cleanup events, and connect with your squad to make eco-action fun and impactful lah! 🌊✨
                     </p>
                     <div class="hero__actions">
                         <button class="btn btn--primary" id="join-now-btn">
-                            🏄‍♀️ Join the Squad
+                            🏄‍♀️ Join the Squad Lah!
                         </button>
                         <button class="btn btn--secondary" id="view-events-btn">
                             📍 View Events
@@ -113,12 +113,22 @@
             </div>
             
             <!-- Weather Widget -->
-            <div class="weather-widget" id="weather-widget">
-                <div class="weather-widget__content">
-                    <span class="weather-widget__label">Current Weather</span>
-                    <div class="weather-widget__data">
-                        <span id="weather-temp">--°C</span>
-                        <span id="weather-condition">Loading...</span>
+            <div class="weather-widget-container">
+                <div class="weather-widget" id="weather-widget">
+                    <div class="weather-widget__header">
+                        <span class="weather-widget__icon" id="weather-icon">⛅</span>
+                        <div class="weather-widget__location">
+                            <span class="weather-widget__label">Current Weather</span>
+                            <span class="weather-widget__place" id="weather-location">East Coast Park</span>
+                        </div>
+                    </div>
+                    <div class="weather-widget__body">
+                        <div class="weather-widget__temp" id="weather-temp">28°C</div>
+                        <div class="weather-widget__condition" id="weather-condition">Partly Cloudy</div>
+                        <div class="weather-widget__details">
+                            <span class="weather-widget__detail" id="weather-humidity">💧 65%</span>
+                            <span class="weather-widget__detail" id="weather-wind">💨 12 km/h</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -127,7 +137,7 @@
         <!-- Features Section -->
         <section id="features" class="features" aria-labelledby="features-title">
             <div class="features__container">
-                <h2 id="features-title" class="features__title">Why ShoreSquad?</h2>
+                <h2 id="features-title" class="features__title">Why ShoreSquad? 🤙</h2>
                 
                 <div class="features__grid">
                     <article class="feature-card">
@@ -160,18 +170,18 @@
         <!-- Map Section -->
         <section id="map" class="map-section" aria-labelledby="map-title">
             <div class="map-section__container">
-                <h2 id="map-title" class="map-section__title">Find Your Next Cleanup</h2>
+                <h2 id="map-title" class="map-section__title">Check Beach Vibes Lah! 🏖️</h2>
                 <div class="map-info">
                     <div class="next-cleanup-info">
                         <h3 class="next-cleanup__title">📍 Next Cleanup Location</h3>
                         <p class="next-cleanup__location">Pasir Ris Beach</p>
-                        <p class="next-cleanup__details">Join us for our upcoming beach cleanup at Pasir Ris!</p>
+                        <p class="next-cleanup__details">Join us for our upcoming beach cleanup at Pasir Ris Beach!</p>
                     </div>
                 </div>
                 <div class="map-container">
                     <div id="cleanup-map" class="cleanup-map">
                         <iframe 
-                            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dw901SwHHzUoZ0&q=1.381497,103.955574&zoom=15&maptype=roadmap"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5691234567890!2d103.955574!3d1.381497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMjInNTMuNCJOIDEwM8KwNTcnMjAuMSJF!5e0!3m2!1sen!2ssg!4v1234567890123!5m2!1sen!2ssg"
                             width="100%" 
                             height="400" 
                             style="border:0;" 
@@ -179,14 +189,8 @@
                             loading="lazy" 
                             referrerpolicy="no-referrer-when-downgrade"
                             title="Next Cleanup Location - Pasir Ris Beach"
-                            aria-label="Google Maps showing the next beach cleanup location at Pasir Ris">
+                            aria-label="Google Maps showing the next beach cleanup location at Pasir Ris Beach">
                         </iframe>
-                        <div class="map-overlay">
-                            <div class="cleanup-pin">
-                                <div class="pin-marker">📍</div>
-                                <div class="pin-label">Next Cleanup</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -261,6 +265,48 @@
                             📊 Impact visualization loading...
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Impact Tracker Section -->
+        <section id="impact" class="impact-tracker" aria-labelledby="impact-title">
+            <div class="impact-tracker__container">
+                <h2 id="impact-title" class="impact-tracker__title">Our Impact So Far! 🎉</h2>
+                <p class="impact-tracker__subtitle">Every piece of trash removed makes our beaches shiok! 🌊</p>
+                
+                <div class="impact-grid">
+                    <div class="impact-card">
+                        <div class="impact-card__icon">🗑️</div>
+                        <div class="impact-card__value">10 kg</div>
+                        <div class="impact-card__label">Trash Collected</div>
+                        <div class="impact-card__location">@ East Coast Park</div>
+                    </div>
+                    
+                    <div class="impact-card">
+                        <div class="impact-card__icon">👥</div>
+                        <div class="impact-card__value">42</div>
+                        <div class="impact-card__label">Squad Members</div>
+                        <div class="impact-card__location">Active This Month</div>
+                    </div>
+                    
+                    <div class="impact-card">
+                        <div class="impact-card__icon">🏖️</div>
+                        <div class="impact-card__value">3</div>
+                        <div class="impact-card__label">Beaches Cleaned</div>
+                        <div class="impact-card__location">In Singapore</div>
+                    </div>
+                    
+                    <div class="impact-card">
+                        <div class="impact-card__icon">🌟</div>
+                        <div class="impact-card__value">8</div>
+                        <div class="impact-card__label">Cleanup Events</div>
+                        <div class="impact-card__location">Completed Sia!</div>
+                    </div>
+                </div>
+                
+                <div class="impact-quote">
+                    <p>"One person's trash is the ocean's treasure when removed!" 🐠💚</p>
                 </div>
             </div>
         </section>
@@ -374,5 +420,27 @@
             });
         }
     </script>
+
+    <!--
+    ===========================================
+    TAWK.TO LIVE CHAT WIDGET
+    ===========================================
+    TODO: Replace 'YOUR_SITE_ID_HERE' with your actual Tawk.to Site ID
+    Get your Site ID from: https://dashboard.tawk.to/
+    ===========================================
+    -->
+    <script type="text/javascript">
+        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+        (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src='https://embed.tawk.to/YOUR_SITE_ID_HERE/default';
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+        })();
+    </script>
+    <!-- End of Tawk.to Script -->
+
 </body>
 </html>

@@ -5,24 +5,26 @@
 
 /* CSS Custom Properties (Variables) */
 :root {
-    /* Color Palette */
-    --primary-color: #00A8CC;          /* Ocean Blue */
-    --secondary-color: #FFD23F;        /* Sun Yellow */
-    --accent-color: #00D2FF;           /* Bright Cyan */
-    --success-color: #4CAF50;          /* Eco Green */
-    --warning-color: #FF6B35;          /* Coral Orange */
-    --neutral-dark: #2C3E50;           /* Deep Blue-Grey */
-    --neutral-light: #F8F9FA;          /* Off-white */
+    /* Beachy Gen-Z Color Palette - Blues & Yellows */
+    --primary-color: #00B4D8;          /* Bright Ocean Blue */
+    --secondary-color: #FFD60A;        /* Vibrant Yellow */
+    --accent-color: #0077B6;           /* Deep Sea Blue */
+    --success-color: #06D6A0;          /* Tropical Green */
+    --warning-color: #F77F00;          /* Sunset Orange */
+    --neutral-dark: #023047;           /* Deep Ocean */
+    --neutral-light: #F8FBFF;          /* Beach Sand Light */
     --white: #FFFFFF;
     --black: #000000;
     
     /* Additional Color Variations */
-    --primary-light: #33C1E6;
-    --primary-dark: #007399;
-    --secondary-light: #FFF95F;
-    --secondary-dark: #E6BD2C;
-    --accent-light: #33DDFF;
-    --accent-dark: #00B8E6;
+    --primary-light: #90E0EF;
+    --primary-dark: #0096C7;
+    --secondary-light: #FFF899;
+    --secondary-dark: #F9C80E;
+    --accent-light: #48CAE4;
+    --accent-dark: #03045E;
+    --card-shadow: rgba(0, 119, 182, 0.15);
+    --card-hover-shadow: rgba(0, 119, 182, 0.25);
     
     /* Typography */
     --font-family-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -57,19 +59,19 @@
     --spacing-4xl: 4rem;      /* 64px */
     --spacing-5xl: 5rem;      /* 80px */
     
-    /* Border Radius */
-    --radius-sm: 0.25rem;     /* 4px */
-    --radius-md: 0.5rem;      /* 8px */
-    --radius-lg: 0.75rem;     /* 12px */
-    --radius-xl: 1rem;        /* 16px */
-    --radius-2xl: 1.5rem;     /* 24px */
+    /* Border Radius - Rounder for Gen-Z Style */
+    --radius-sm: 0.5rem;      /* 8px */
+    --radius-md: 1rem;        /* 16px */
+    --radius-lg: 1.5rem;      /* 24px */
+    --radius-xl: 2rem;        /* 32px */
+    --radius-2xl: 2.5rem;     /* 40px */
     --radius-full: 9999px;
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* Shadows - Enhanced for Card-style Design */
+    --shadow-sm: 0 2px 8px rgba(0, 119, 182, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 119, 182, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 119, 182, 0.2);
+    --shadow-xl: 0 12px 32px rgba(0, 119, 182, 0.25);
     
     /* Transitions */
     --transition-fast: 0.15s ease-in-out;
@@ -102,7 +104,7 @@ body {
     font-weight: var(--font-weight-normal);
     line-height: var(--line-height-normal);
     color: var(--neutral-dark);
-    background-color: var(--white);
+    background: linear-gradient(135deg, #F8FBFF 0%, #E3F5FF 100%);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -239,8 +241,8 @@ a:hover, a:focus {
     border-color: var(--primary-dark);
     color: var(--white);
     text-decoration: none;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 119, 182, 0.4);
 }
 
 .btn--secondary {
@@ -389,7 +391,7 @@ a:hover, a:focus {
 
 .hero {
     min-height: calc(100vh - var(--header-height));
-    background: linear-gradient(135deg, var(--neutral-light) 0%, var(--accent-color) 100%);
+    background: linear-gradient(135deg, #90E0EF 0%, #00B4D8 50%, #0077B6 100%);
     display: flex;
     align-items: center;
     position: relative;
@@ -414,27 +416,25 @@ a:hover, a:focus {
 .hero__title {
     font-size: var(--font-size-4xl);
     font-weight: var(--font-weight-bold);
-    color: var(--neutral-dark);
+    color: var(--white);
     margin-bottom: var(--spacing-lg);
     line-height: var(--line-height-tight);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .hero__title--highlight {
-    color: var(--primary-color);
-    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--secondary-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hero__subtitle {
     font-size: var(--font-size-xl);
-    color: var(--neutral-dark);
-    opacity: 0.8;
+    color: var(--white);
     margin-bottom: var(--spacing-2xl);
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .hero__actions {
@@ -472,32 +472,112 @@ a:hover, a:focus {
     75% { transform: rotate(-5deg); }
 }
 
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+}
+
 /* Weather Widget */
+.weather-widget-container {
+    width: 100%;
+    max-width: var(--max-width-container);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    position: relative;
+    z-index: 10;
+}
+
 .weather-widget {
-    position: absolute;
-    top: var(--spacing-2xl);
-    right: var(--spacing-2xl);
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-md);
-    box-shadow: var(--shadow-md);
-    min-width: 180px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    box-shadow: 0 8px 32px rgba(0, 119, 182, 0.25);
+    border: 3px solid var(--secondary-color);
+    max-width: 500px;
+    margin: var(--spacing-2xl) auto;
+    transition: all var(--transition-normal);
+}
+
+.weather-widget:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 119, 182, 0.35);
+}
+
+.weather-widget__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--secondary-light);
+}
+
+.weather-widget__icon {
+    font-size: var(--font-size-4xl);
+    line-height: 1;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.weather-widget__location {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
 }
 
 .weather-widget__label {
     font-size: var(--font-size-sm);
+    color: var(--accent-color);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.weather-widget__place {
+    font-size: var(--font-size-lg);
     color: var(--neutral-dark);
-    opacity: 0.7;
-    display: block;
+    font-weight: var(--font-weight-bold);
+}
+
+.weather-widget__body {
+    text-align: center;
+}
+
+.weather-widget__temp {
+    font-size: var(--font-size-5xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    line-height: 1;
     margin-bottom: var(--spacing-sm);
 }
 
-.weather-widget__data {
+.weather-widget__condition {
+    font-size: var(--font-size-lg);
+    color: var(--neutral-dark);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-lg);
+}
+
+.weather-widget__details {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    padding-top: var(--spacing-md);
+    border-top: 2px solid var(--secondary-light);
+}
+
+.weather-widget__detail {
+    font-size: var(--font-size-md);
+    color: var(--neutral-dark);
+    font-weight: var(--font-weight-medium);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    font-weight: var(--font-weight-semibold);
+    gap: var(--spacing-xs);
 }
 
 /* ========================================
@@ -506,7 +586,7 @@ a:hover, a:focus {
 
 .features {
     padding: var(--spacing-5xl) 0;
-    background-color: var(--white);
+    background: linear-gradient(180deg, var(--white) 0%, var(--neutral-light) 100%);
 }
 
 .features__container {
@@ -519,6 +599,7 @@ a:hover, a:focus {
     text-align: center;
     margin-bottom: var(--spacing-4xl);
     font-size: var(--font-size-3xl);
+    color: var(--accent-color);
 }
 
 .features__grid {
@@ -530,16 +611,17 @@ a:hover, a:focus {
 .feature-card {
     background: var(--white);
     padding: var(--spacing-2xl);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-2xl);
     text-align: center;
-    box-shadow: var(--shadow-md);
-    border: 1px solid rgba(0, 168, 204, 0.1);
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+    border: 3px solid transparent;
+    transition: all var(--transition-normal);
 }
 
 .feature-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--secondary-color);
 }
 
 .feature-card__icon {
@@ -588,9 +670,9 @@ a:hover, a:focus {
 .next-cleanup-info {
     background: var(--white);
     padding: var(--spacing-xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-    border-left: 4px solid var(--primary-color);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--secondary-color);
     max-width: 500px;
     margin: 0 auto;
 }
@@ -616,10 +698,11 @@ a:hover, a:focus {
 }
 
 .map-container {
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-2xl);
     overflow: hidden;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-xl);
     position: relative;
+    border: 3px solid var(--primary-color);
 }
 
 .cleanup-map {
@@ -744,36 +827,38 @@ a:hover, a:focus {
 
 .event-card {
     background: var(--white);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-2xl);
     padding: var(--spacing-xl);
-    box-shadow: var(--shadow-md);
-    border: 1px solid rgba(0, 168, 204, 0.1);
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+    border: 3px solid transparent;
+    transition: all var(--transition-normal);
     position: relative;
 }
 
 .event-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-color);
 }
 
 .event-card--featured {
-    border: 2px solid var(--primary-color);
-    background: linear-gradient(135deg, var(--white) 0%, rgba(0, 168, 204, 0.05) 100%);
+    border-color: var(--secondary-color);
+    background: linear-gradient(135deg, var(--white) 0%, rgba(255, 214, 10, 0.1) 100%);
 }
 
 .event-card__badge {
     position: absolute;
-    top: -10px;
+    top: -12px;
     right: var(--spacing-lg);
-    background: var(--primary-color);
-    color: var(--white);
+    background: var(--secondary-color);
+    color: var(--neutral-dark);
     padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-full);
     font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: var(--shadow-md);
 }
 
 .event-card__header {
@@ -887,12 +972,144 @@ a:hover, a:focus {
 }
 
 /* ========================================
+   Impact Tracker Section
+======================================== */
+
+.impact-tracker {
+    padding: var(--spacing-5xl) 0;
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.impact-tracker::before {
+    content: '🌊';
+    position: absolute;
+    font-size: 15rem;
+    opacity: 0.1;
+    top: -5rem;
+    right: -5rem;
+    transform: rotate(-15deg);
+}
+
+.impact-tracker__container {
+    max-width: var(--max-width-container);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    position: relative;
+    z-index: 1;
+}
+
+.impact-tracker__title {
+    font-size: var(--font-size-3xl);
+    text-align: center;
+    color: var(--neutral-dark);
+    margin-bottom: var(--spacing-md);
+}
+
+.impact-tracker__subtitle {
+    text-align: center;
+    font-size: var(--font-size-lg);
+    color: var(--neutral-dark);
+    margin-bottom: var(--spacing-4xl);
+    opacity: 0.8;
+}
+
+.impact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-3xl);
+}
+
+.impact-card {
+    background: var(--white);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-2xl);
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+    border: 3px solid var(--primary-color);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.impact-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.impact-card:hover::before {
+    left: 100%;
+}
+
+.impact-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(0, 119, 182, 0.3);
+    border-color: var(--accent-color);
+}
+
+.impact-card__icon {
+    font-size: var(--font-size-5xl);
+    margin-bottom: var(--spacing-md);
+    animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+@keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.impact-card__value {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1;
+}
+
+.impact-card__label {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--neutral-dark);
+    margin-bottom: var(--spacing-xs);
+}
+
+.impact-card__location {
+    font-size: var(--font-size-sm);
+    color: var(--accent-color);
+    font-weight: var(--font-weight-medium);
+}
+
+.impact-quote {
+    background: var(--white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    border-left: 5px solid var(--primary-color);
+}
+
+.impact-quote p {
+    font-size: var(--font-size-xl);
+    font-style: italic;
+    color: var(--neutral-dark);
+    margin: 0;
+}
+
+/* ========================================
    Join CTA Section
 ======================================== */
 
 .join-cta {
     padding: var(--spacing-5xl) 0;
-    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
     color: var(--white);
     text-align: center;
 }
@@ -1122,6 +1339,9 @@ a:hover, a:focus {
    Responsive Design
 ======================================== */
 
+/* Mobile First - Single Column Layout */
+/* Base styles above are mobile-first (single column) */
+
 /* Tablet styles */
 @media screen and (min-width: 768px) {
     :root {
@@ -1147,12 +1367,17 @@ a:hover, a:focus {
         justify-content: flex-start;
     }
     
+    /* Multi-column layouts on tablet and up */
     .features__grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
     
     .events__grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+    
+    .impact-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .about__container {
@@ -1202,6 +1427,10 @@ a:hover, a:focus {
     .cleanup-map {
         height: 500px;
     }
+    
+    .impact-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 /* Mobile navigation */
@@ -1238,21 +1467,38 @@ a:hover, a:focus {
     }
     
     .weather-widget {
-        position: relative;
-        top: auto;
-        right: auto;
-        margin: var(--spacing-xl) auto 0;
-        width: fit-content;
+        padding: var(--spacing-lg);
+        margin: var(--spacing-xl) auto;
+    }
+    
+    .weather-widget__header {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-sm);
+    }
+    
+    .weather-widget__icon {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .weather-widget__temp {
+        font-size: var(--font-size-4xl);
+    }
+    
+    .weather-widget__details {
+        flex-direction: column;
+        gap: var(--spacing-sm);
     }
     
     .hero__actions {
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
+        gap: var(--spacing-md);
     }
     
     .hero__actions .btn {
         width: 100%;
-        max-width: 280px;
+        max-width: 100%;
     }
     
     .features__grid {
